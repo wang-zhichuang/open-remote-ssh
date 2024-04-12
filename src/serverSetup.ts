@@ -300,6 +300,9 @@ if [[ ! -f $SERVER_SCRIPT ]]; then
         ppc64le)
             SERVER_ARCH="ppc64le"
             ;;
+        riscv64)
+            SERVER_ARCH="riscv64"
+            ;;
         *)
             echo "Error architecture not supported: $ARCH"
             print_install_results_and_exit 1
