@@ -244,48 +244,6 @@ print_install_results_and_exit() {
     exit 0
 }
 
-# Check if platform is supported
-KERNEL="$(uname -s)"
-case $KERNEL in
-    Darwin)
-        PLATFORM="darwin"
-        ;;
-    Linux)
-        PLATFORM="linux"
-        ;;
-    FreeBSD)
-        PLATFORM="freebsd"
-        ;;
-    DragonFly)
-        PLATFORM="dragonfly"
-        ;;
-    *)
-        echo "Error platform not supported: $KERNEL"
-        print_install_results_and_exit 1
-        ;;
-esac
-
-# Check machine architecture
-ARCH="$(uname -m)"
-case $ARCH in
-    x86_64 | amd64)
-        SERVER_ARCH="x64"
-        ;;
-    armv7l | armv8l)
-        SERVER_ARCH="armhf"
-        ;;
-    arm64 | aarch64)
-        SERVER_ARCH="arm64"
-        ;;
-    ppc64le)
-        SERVER_ARCH="ppc64le"
-        ;;
-    *)
-        echo "Error architecture not supported: $ARCH"
-        print_install_results_and_exit 1
-        ;;
-esac
-
 # https://www.freedesktop.org/software/systemd/man/os-release.html
 OS_RELEASE_ID="$(grep -i '^ID=' /etc/os-release 2>/dev/null | sed 's/^ID=//gi' | sed 's/"//g')"
 if [[ -z $OS_RELEASE_ID ]]; then
@@ -304,10 +262,52 @@ if [[ ! -d $SERVER_DIR ]]; then
     fi
 fi
 
-SERVER_DOWNLOAD_URL="$(echo "${serverDownloadUrlTemplate.replace(/\$\{/g, '\\${')}" | sed "s/\\\${quality}/$DISTRO_QUALITY/g" | sed "s/\\\${version}/$DISTRO_VERSION/g" | sed "s/\\\${commit}/$DISTRO_COMMIT/g" | sed "s/\\\${os}/$PLATFORM/g" | sed "s/\\\${arch}/$SERVER_ARCH/g" | sed "s/\\\${release}/$DISTRO_VSCODIUM_RELEASE/g")"
-
 # Check if server script is already installed
 if [[ ! -f $SERVER_SCRIPT ]]; then
+    # Check if platform is supported
+    KERNEL="$(uname -s)"
+    case $KERNEL in
+        Darwin)
+            PLATFORM="darwin"
+            ;;
+        Linux)
+            PLATFORM="linux"
+            ;;
+        FreeBSD)
+            PLATFORM="freebsd"
+            ;;
+        DragonFly)
+            PLATFORM="dragonfly"
+            ;;
+        *)
+            echo "Error platform not supported: $KERNEL"
+            print_install_results_and_exit 1
+            ;;
+    esac
+
+    # Check machine architecture
+    ARCH="$(uname -m)"
+    case $ARCH in
+        x86_64 | amd64)
+            SERVER_ARCH="x64"
+            ;;
+        armv7l | armv8l)
+            SERVER_ARCH="armhf"
+            ;;
+        arm64 | aarch64)
+            SERVER_ARCH="arm64"
+            ;;
+        ppc64le)
+            SERVER_ARCH="ppc64le"
+            ;;
+        *)
+            echo "Error architecture not supported: $ARCH"
+            print_install_results_and_exit 1
+            ;;
+    esac
+
+    SERVER_DOWNLOAD_URL="$(echo "${serverDownloadUrlTemplate.replace(/\$\{/g, '\\${')}" | sed "s/\\\${quality}/$DISTRO_QUALITY/g" | sed "s/\\\${version}/$DISTRO_VERSION/g" | sed "s/\\\${commit}/$DISTRO_COMMIT/g" | sed "s/\\\${os}/$PLATFORM/g" | sed "s/\\\${arch}/$SERVER_ARCH/g" | sed "s/\\\${release}/$DISTRO_VSCODIUM_RELEASE/g")"
+
     if [[ "$PLATFORM" != "darwin" ]] && [[ "$PLATFORM" != "linux" ]]; then
         echo "Error "$PLATFORM" needs manual installation of remote extension host"
         print_install_results_and_exit 1
